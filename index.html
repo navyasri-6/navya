@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paytm Wallet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Paytm Wallet</h1>
+        <div class="wallet-info">
+            <h2>Balance: <span id="balance">0</span> INR</h2>
+        </div>
+        
+        <div class="actions">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" placeholder="Enter amount" />
+            <div class="buttons">
+                <button id="depositBtn">Deposit</button>
+                <button id="withdrawBtn">Withdraw</button>
+            </div>
+        </div>
+        
+        <div class="history">
+            <h3>Transaction History</h3>
+            <ul id="transactionHistory"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+}
+
+h1 {
+    color: #009688;
+}
+
+.wallet-info {
+    margin-bottom: 20px;
+}
+
+#balance {
+    font-weight: bold;
+    color: #009688;
+}
+
+.actions {
+    margin-bottom: 20px;
+}
+
+input[type="number"] {
+    padding: 5px;
+    font-size: 16px;
+    width: 80%;
+    margin: 10px 0;
+}
+
+button {
+    background-color: #009688;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #00796b;
+}
+
+.history {
+    margin-top: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: #e0f7fa;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 5px;
+    color: #00796b;
+}
+// Variables
+let balance = 0;
+const balanceElement = document.getElementById("balance");
+const transactionHistoryElement = document.getElementById("transactionHistory");
+const amountInput = document.getElementById("amount");
+
+// Function to update the balance and transaction history
+function updateWallet() {
+    balanceElement.innerText = balance;
+
+    // Update transaction history
+    const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    transactionHistoryElement.innerHTML = '';
+    transactions.forEach(transaction => {
+        const listItem = document.createElement("li");
+        listItem.innerText = `${transaction.type} of ₹${transaction.amount}`;
+        transactionHistoryElement.appendChild(listItem);
+    });
+}
+
+// Function to handle deposit
+document.getElementById("depositBtn").addEventListener("click", () => {
+    const amount = parseFloat(amountInput.value);
+    if (amount > 0) {
+        balance += amount;
+        saveTransaction("Deposit", amount);
+        amountInput.value = ""; // Clear the input field
+        updateWallet();
+    } else {
+        alert("Please enter a valid amount.");
+    }
+});
+
+// Function to handle withdrawal
+document.getElementById("withdrawBtn").addEventListener("click", () => {
+    const amount = parseFloat(amountInput.value);
+    if (amount > 0 && amount <= balance) {
+        balance -= amount;
+        saveTransaction("Withdraw", amount);
+        amountInput.value = ""; // Clear the input field
+        updateWallet();
+    } else {
+        alert("Please enter a valid amount or ensure you have sufficient balance.");
+    }
+});
+
+// Function to save transactions in localStorage
+function saveTransaction(type, amount) {
+    const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    transactions.push({ type, amount });
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+// Initial call to update the wallet on page load
+updateWallet();
+
